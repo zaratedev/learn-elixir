@@ -2,7 +2,7 @@ defmodule Servy.Handler do
   @moduledoc "Hanldes HTTP requests."
 
   alias Servy.VideoCam
-  alias Servy.Fetcher
+  # alias Servy.Fetcher
   alias Servy.Conv, as: Conv
   alias Servy.BearController
 
@@ -27,14 +27,14 @@ defmodule Servy.Handler do
 
   # Function Clauses
   def route(%Conv{ method: "GET", path: "/snapshots" } = conv) do
-    pid4 = Fetcher.async(fn -> Servy.Tracker.get_location("bigfoot") end)
+    task = Task.async(fn -> Servy.Tracker.get_location("bigfoot") end)
 
     snapshots =
       ["cam-1", "cam-2", "cam3"]
-      |> Enum.map(&Fetcher.async(fn -> VideoCam.get_snapshot(&1) end))
-      |> Enum.map(&Fetcher.get_result/1)
+      |> Enum.map(&Task.async(fn -> VideoCam.get_snapshot(&1) end))
+      |> Enum.map(&Task.await/1)
 
-    bigfoot = Fetcher.get_result(pid4)
+    bigfoot = Task.await(task)
 
     %{conv | status: 200, resp_body: inspect({snapshots, bigfoot})}
   end
