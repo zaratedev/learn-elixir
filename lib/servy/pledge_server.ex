@@ -67,7 +67,7 @@ defmodule Servy.PledgeServer do
     {:reply, id, new_state}
   end
 
-  def handle_info(message, state) do
+  def handle_info(_message, _state) do
 
   end
 
